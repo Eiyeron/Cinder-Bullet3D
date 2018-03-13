@@ -81,37 +81,47 @@ btMatrix3x3 toBullet( const ci::mat3 &cinderMat3 )
 	return trans;
 }
 
-	
+
 BoxShapeRef createBoxShape( const ci::vec3 &halfExtents )
 {
 	return BoxShapeRef( new btBoxShape( toBullet( halfExtents ) ) );
 }
-	
+
 ConeShapeRef createConeShape( btScalar radius, btScalar height )
 {
 	return ConeShapeRef( new btConeShape( radius, height ) );
 }
-	
+
 CapsuleShapeRef createCapsuleShape( btScalar radius, btScalar height )
 {
 	return CapsuleShapeRef( new btCapsuleShape( radius, height ) );
 }
-	
+
+CapsuleShapeRef createCapsuleShapeX( btScalar radius, btScalar height )
+{
+	return CapsuleShapeRef( new btCapsuleShapeX( radius, height ) );
+}
+
+CapsuleShapeRef createCapsuleShapeZ( btScalar radius, btScalar height )
+{
+	return CapsuleShapeRef( new btCapsuleShapeZ( radius, height ) );
+}
+
 CylinderShapeRef createCylinderShape( const ci::vec3 &halExtents )
 {
 	return CylinderShapeRef( new btCylinderShape( toBullet( halExtents ) ) );
 }
-	
+
 SphereShapeRef createSphereShape( btScalar radius )
 {
 	return SphereShapeRef( new btSphereShape( radius ) );
 }
-	
+
 StaticPlaneShapeRef createStaticPlaneShape( const ci::vec3 &normal, btScalar offset )
 {
 	return StaticPlaneShapeRef( new btStaticPlaneShape( toBullet( normal ), offset ) );
 }
-	
+
 MultiSphereShapeRef createMultiSphereShape( const std::vector<ci::vec3> &positions, const std::vector<btScalar> &radii )
 {
 	assert( positions.size() == radii.size() );
@@ -125,82 +135,82 @@ MultiSphereShapeRef createMultiSphereShape( const std::vector<ci::vec3> &positio
 	}
 	return createMultiSphereShape( bulletPositions, radii );
 }
-	
+
 MultiSphereShapeRef createMultiSphereShape( const std::vector<btVector3> &positions, const std::vector<btScalar> &radii )
 {
 	assert( positions.size() == radii.size() );
 	return MultiSphereShapeRef( new btMultiSphereShape( positions.data(), radii.data(), positions.size() ) );
 }
-	
+
 CompoundShapeRef createCompoundShape( const ShapesAndOffsets &shapesAndOffsets )
 {
 	CompoundShapeRef pCompound( new btCompoundShape() );
-	
+
 	auto shapeIt = shapesAndOffsets.begin();
 	auto end = shapesAndOffsets.end();
 	while(  shapeIt != end ) {
 		pCompound->addChildShape( shapeIt->second, shapeIt->first.get() );
 		++shapeIt;
 	}
-	
+
 	return pCompound;
 }
-	
+
 ConvexHullShapeRef createConvexHull( const ci::TriMeshRef &mesh )
 {
 	auto mMesh = mesh->getPositions<3>();
 	std::vector<btVector3> mBulletMesh( mesh->getNumVertices() );
-	
+
 	auto bulletIt = mBulletMesh.begin();
 	auto end = mBulletMesh.end();
 	while( bulletIt != end ) {
 		*bulletIt = toBullet( *mMesh++ );
 		++bulletIt;
 	}
-	
+
 	ConvexHullShapeRef convexShape( new btConvexHullShape( &mBulletMesh.data()->getX(), mBulletMesh.size() ) );
 	convexShape->initializePolyhedralFeatures();
-	
+
 	return convexShape;
 }
-	
+
 HeightfieldTerrainShapeRef createHeightfieldShape( const ci::Channel32f *heightData, float maxHeight, float minHeight, ci::vec3 scale )
 {
 	int32_t length	= heightData->getHeight();
 	int32_t width	= heightData->getWidth();
-	
+
 	float heightScale = math<float>::abs( minHeight ) + math<float>::abs( maxHeight );
 	HeightfieldTerrainShapeRef shape( new btHeightfieldTerrainShape( width, length, heightData->getData(), heightScale, minHeight, maxHeight, 1, PHY_FLOAT, false ) );
 	shape->setLocalScaling( toBullet( scale ) );
-	
+
 	return shape;
 }
-	
+
 UniformScalingShapeRef createUniformScalingShape( const btCollisionShapeRef &shape, float uniformScalingFactor )
 {
 	return UniformScalingShapeRef( new btUniformScalingShape( (btConvexShape*)shape.get(), uniformScalingFactor ) );
 }
-	
+
 namespace drawableHelpers {
-	
+
 ci::gl::VboMeshRef getDrawableHeightfield( const Channel32f *heightData )
 {
 	int32_t depth	= heightData->getHeight();
 	int32_t width	= heightData->getWidth();
-	
+
 	auto plane = TriMesh::create( geom::Plane().subdivisions( ivec2( width - 1, depth - 1 ) ).size( vec2( width - 1, depth - 1 ) ) );
-	
+
 	for( int z = 0; z < depth; ++z ) {
 		for( int x = 0; x < width; ++x ) {
 			auto & vert = plane->getPositions<3>()[z + depth * x];
 			vert.y = heightData->getValue( ivec2( x, z ) );
 		}
 	}
-	
+
 	auto ret = gl::VboMesh::create( *plane );
 	return ret;
 }
-	
+
 ci::gl::VboMeshRef getDrawablePlane( const StaticPlaneShapeRef &plane )
 {
 	// TODO: Test this.
@@ -210,11 +220,11 @@ ci::gl::VboMeshRef getDrawablePlane( const StaticPlaneShapeRef &plane )
 								.size( vec2( 1000, 1000 ) )
 								.normal( normal )
 								.origin( normal * constant );
-	
+
 	return ci::gl::VboMesh::create( geomPlane );
-	
+
 }
-	
+
 ci::gl::VboMeshRef getDrawableSoftBody( const SoftBodyRef &softBody, bool interleaved )
 {
 	if( interleaved ) {
@@ -279,7 +289,7 @@ ci::gl::VboMeshRef getDrawableSoftBody( const SoftBodyRef &softBody, bool interl
 		return vboMesh;
 	}
 }
-	
+
 void updateVboMesh( ci::gl::VboMeshRef &mesh, const SoftBodyRef &softBody )
 {
 	auto meshPos = mesh->mapAttrib3f( geom::POSITION );
@@ -292,11 +302,11 @@ void updateVboMesh( ci::gl::VboMeshRef &mesh, const SoftBodyRef &softBody )
 	meshPos.unmap();
 	meshNorm.unmap();
 }
-	
+
 void drawSoftBodyLineImpl( const SoftBodyRef &softBody )
 {
 	auto links = softBody->getLinks();
-	
+
 	gl::begin( GL_LINES );
 	for(int j = 0; j < links.size(); ++j )
 	{
@@ -304,14 +314,14 @@ void drawSoftBodyLineImpl( const SoftBodyRef &softBody )
 		auto node_1 = links[j].m_n[1];
 		gl::vertex( bt::fromBullet( node_0->m_x ) );
 		gl::vertex( bt::fromBullet( node_1->m_x ) );
-		
+
 		/* Or if you need indices...      */
 		//			const int indices[]={   int(node_0-&nodes[0]),
 		//				int(node_1-&nodes[0])};
 	}
 	gl::end();
 }
-	
+
 void drawSoftBodyTriImpl( const SoftBodyRef &softBody )
 {
 	auto faces = softBody->getFaces();
@@ -324,7 +334,7 @@ void drawSoftBodyTriImpl( const SoftBodyRef &softBody )
 		gl::vertex( bt::fromBullet( node_0->m_x ) );
 		gl::vertex( bt::fromBullet( node_1->m_x ) );
 		gl::vertex( bt::fromBullet( node_2->m_x ) );
-	
+
 		/* Or if you need indices...      */
 		//			const int indices[]={   int(node_0-&nodes[0]),
 		//				int(node_1-&nodes[0]),
@@ -332,7 +342,7 @@ void drawSoftBodyTriImpl( const SoftBodyRef &softBody )
 	}
 	gl::end();
 }
-	
+
 void drawSoftBodyPointImpl( const SoftBodyRef &softBody )
 {
 	auto nodes = softBody->getNodes();
@@ -345,7 +355,7 @@ void drawSoftBodyPointImpl( const SoftBodyRef &softBody )
 	}
 	gl::end();
 }
-	
+
 void drawSoftBody( const SoftBodyRef &softBody, SoftBodyDrawType type )
 {
 	switch ( type ) {
@@ -362,7 +372,7 @@ void drawSoftBody( const SoftBodyRef &softBody, SoftBodyDrawType type )
 		break;
 	}
 }
-	
+
 } // namespace drawableHelpers
-	
+
 } // namespace bullet

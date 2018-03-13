@@ -28,7 +28,7 @@ namespace bullet {
 
 class Context;
 using ContextRef = std::shared_ptr<Context>;
-	
+
 using btCollisionShapeRef = std::shared_ptr<btCollisionShape>;
 using OpenGLMotionStateRef = std::shared_ptr<class OpenGLMotionState>;
 using btRigidBodyRef = std::shared_ptr<btRigidBody>;
@@ -36,8 +36,8 @@ using btSoftBodyRef = std::shared_ptr<class btSoftBody>;
 using btDiscreteDynamicsWorldRef = std::shared_ptr<btDiscreteDynamicsWorld>;
 using btDynamicsWorldRef = std::shared_ptr<btDynamicsWorld>;
 using btCollisionObjectRef = std::shared_ptr<btCollisionObject>;
-	
-	
+
+
 using ConstraintBaseRef = std::shared_ptr<class ConstraintBase>;
 using btTypedConstraintRef = std::shared_ptr<class btTypedConstraint>;
 using ConstraintConeTwistRef = std::shared_ptr<class ConstraintConeTwist>;
@@ -48,7 +48,7 @@ using ConstraintPoint2PointRef = std::shared_ptr<class ConstraintPoint2Point>;
 using btPoint2PointConstraintRef = std::shared_ptr<class btPoint2PointConstraint>;
 using ConstraintGeneric6DofRef = std::shared_ptr<class ConstraintGeneric6Dof>;
 using btGeneric6DofConstraintRef = std::shared_ptr<class btGeneric6DofConstraint>;
-	
+
 using BoxShapeRef = std::shared_ptr<btBoxShape>;
 using ConeShapeRef = std::shared_ptr<btConeShape>;
 using CapsuleShapeRef = std::shared_ptr<btCapsuleShape>;
@@ -60,11 +60,11 @@ using CompoundShapeRef = std::shared_ptr<btCompoundShape>;
 using ConvexHullShapeRef = std::shared_ptr<btConvexHullShape>;
 using HeightfieldTerrainShapeRef = std::shared_ptr<btHeightfieldTerrainShape>;
 using UniformScalingShapeRef = std::shared_ptr<btUniformScalingShape>;
-	
+
 using DebugRendererRef = std::shared_ptr<class PhysicsDebugRenderable>;
 using RigidBodyRef = std::shared_ptr<class RigidBody>;
 using SoftBodyRef = std::shared_ptr<class SoftBody>;
-	
+
 // Pointer to the main Bullet Context
 Context* Context();
 
@@ -76,16 +76,18 @@ ci::mat4 fromBullet( const btTransform &bulletTrans );
 btTransform toBullet( const ci::mat4 &cinderMat4 );
 ci::mat3 fromBullet( const btMatrix3x3 &bulletMat3 );
 btMatrix3x3 toBullet( const ci::mat3 &cinderMat3 );
-	
+
 BoxShapeRef createBoxShape( const ci::vec3 &halfExtents );
 ConeShapeRef createConeShape( btScalar radius, btScalar height );
 CapsuleShapeRef createCapsuleShape( btScalar radius, btScalar height );
+CapsuleShapeRef createCapsuleShapeX( btScalar radius, btScalar height );
+CapsuleShapeRef createCapsuleShapeZ( btScalar radius, btScalar height );
 CylinderShapeRef createCylinderShape( const ci::vec3 &halfExtents );
 SphereShapeRef createSphereShape( btScalar radius );
 StaticPlaneShapeRef createStaticPlaneShape( const ci::vec3 &normal, btScalar offset );
 MultiSphereShapeRef createMultiSphereShape( const std::vector<ci::vec3> &positions, const std::vector<btScalar> &radii );
 MultiSphereShapeRef createMultiSphereShape( const std::vector<btVector3> &positions, const std::vector<btScalar> &radii );
-	
+
 using ShapesAndOffsets = std::map<btCollisionShapeRef, btTransform>;
 CompoundShapeRef createCompoundShape( const ShapesAndOffsets &shapesAndOffsets );
 ConvexHullShapeRef createConvexHull( const ci::TriMeshRef &mesh );
@@ -94,9 +96,9 @@ HeightfieldTerrainShapeRef createHeightfieldShape( const ci::Channel32f *heightD
 													float maxHeight,
 													ci::vec3 scale = ci::vec3( 1.0f ) );
 UniformScalingShapeRef createUniformScalingShape( const btCollisionShapeRef &shape, float uniformScalingFactor );
-	
+
 namespace drawableHelpers {
-	
+
 enum class SoftBodyDrawType {
 	POINTS,
 	LINES,
@@ -110,7 +112,7 @@ ci::gl::VboMeshRef getDrawableSoftBody( const SoftBodyRef &softBody, bool interl
 void updateVboMesh( ci::gl::VboMeshRef &mesh, const SoftBodyRef &softBody );
 //! Draws
 void drawSoftBody( const SoftBodyRef &softBody, SoftBodyDrawType type = SoftBodyDrawType::TRIANGLES );
-	
+
 }
 
 enum PhyObjType {
@@ -129,7 +131,7 @@ enum PhyObjType {
 	UNIFORM_SCALING_SHAPE,
 	NO_SHAPE
 };
-	
+
 static PhyObjType getPhyObjType( const char * name )
 {
 	if( strcmp( name, "Box" ) == 0 ) {
@@ -212,7 +214,7 @@ static const char * getPhyObjType( PhyObjType type )
 		}
 	}
 }
-	
+
 }
 
 namespace bt = bullet;
