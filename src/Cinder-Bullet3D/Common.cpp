@@ -174,6 +174,33 @@ ConvexHullShapeRef createConvexHull( const ci::TriMeshRef &mesh )
 	return convexShape;
 }
 
+BvhTriangleMeshShape::BvhTriangleMeshShape( const ci::TriMeshRef &mesh, bool useCompression)
+	: m_indices(mesh->getIndices().size())
+	, m_positions(mesh->getBufferPositions().size())
+{
+	auto vertices = mesh->getBufferPositions();
+	auto indices = mesh->getIndices();
+	std::transform(vertices.begin(), vertices.end(), m_positions.begin(), [](auto & _v){return btScalar(_v); });
+	std::transform(indices.begin(), indices.end(), m_indices.begin(), [](auto & _v){return int(_v); });
+
+	m_stride = std::make_unique<btTriangleIndexVertexArray>(
+		int(m_indices.size()/3),
+		m_indices.data(),
+		sizeof(int)*3,
+		int(m_positions.size()/3),
+		m_positions.data(),
+		sizeof(btScalar) * 3
+	);
+
+	m_shape = make_shared<btBvhTriangleMeshShape>(m_stride.get(), useCompression);
+
+}
+
+BvhTriangleMeshShapeRef createBvhTriangleMesh( const ci::TriMeshRef &mesh, bool useCompression)
+{
+	return std::make_shared<BvhTriangleMeshShape>(mesh, useCompression);
+}
+
 HeightfieldTerrainShapeRef createHeightfieldShape( const ci::Channel32f *heightData, float maxHeight, float minHeight, ci::vec3 scale )
 {
 	int32_t length	= heightData->getHeight();

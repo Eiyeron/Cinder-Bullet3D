@@ -26,6 +26,18 @@ class btHeightfieldTerrainShape;
 
 namespace bullet {
 
+
+class BvhTriangleMeshShape
+{
+	public:
+	BvhTriangleMeshShape( const ci::TriMeshRef &mesh, bool useCompression = true);
+
+	std::unique_ptr<btStridingMeshInterface> m_stride;
+	std::shared_ptr<btBvhTriangleMeshShape> m_shape;
+	std::vector<int> m_indices;
+	std::vector<btScalar> m_positions;
+};
+
 class Context;
 using ContextRef = std::shared_ptr<Context>;
 
@@ -58,6 +70,7 @@ using StaticPlaneShapeRef = std::shared_ptr<btStaticPlaneShape>;
 using MultiSphereShapeRef = std::shared_ptr<btMultiSphereShape>;
 using CompoundShapeRef = std::shared_ptr<btCompoundShape>;
 using ConvexHullShapeRef = std::shared_ptr<btConvexHullShape>;
+using BvhTriangleMeshShapeRef = std::shared_ptr<BvhTriangleMeshShape>;
 using HeightfieldTerrainShapeRef = std::shared_ptr<btHeightfieldTerrainShape>;
 using UniformScalingShapeRef = std::shared_ptr<btUniformScalingShape>;
 
@@ -91,6 +104,7 @@ MultiSphereShapeRef createMultiSphereShape( const std::vector<btVector3> &positi
 using ShapesAndOffsets = std::map<btCollisionShapeRef, btTransform>;
 CompoundShapeRef createCompoundShape( const ShapesAndOffsets &shapesAndOffsets );
 ConvexHullShapeRef createConvexHull( const ci::TriMeshRef &mesh );
+BvhTriangleMeshShapeRef createBvhTriangleMesh( const ci::TriMeshRef &mesh, bool useCompression = true );
 HeightfieldTerrainShapeRef createHeightfieldShape( const ci::Channel32f *heightData,
 													float minHeight,
 													float maxHeight,
